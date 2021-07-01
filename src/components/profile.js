@@ -1,62 +1,57 @@
-import React, { Component } from 'react'
-import { Card, ListGroup, ListGroupItem } from 'react-bootstrap'
-import { Navbar, NavbarBrand, NavLink, FormControl } from 'react-bootstrap'
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import {Link} from 'react-router-dom';
 
-export default class Profile extends Component {
-    constructor () {
-        super ()
-        this.state = {
-            items : []
-        }
+function Profile() {
+  const [users, setUsers] = useState([]);
+  const [fetch, setFetch] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const result = await axios.get(
+        `https://rickandmortyapi.com/api/character`
+      );
+      console.log(result);
+      setUsers(
+        result.data.results.map((item) => {
+          const {id, name, status, species, gender, origin, location, image} = item;
+          return {
+            id, name, status, species, gender, origin, location, image
+          };
+        })
+      );
+    };
+    if (fetch) {
+      fetchData();
+      setFetch(false);
     }
-    componentDidMount() {
-        fetch("https://randomuser.me/api/?results=8")
-          .then(res => res.json())
-          .then(parsedJSON => parsedJSON.results.map(data => (
-            {
-              id: `${data.id.name}`,
-              firstName: `${data.name.first}`,
-              lastName: `${data.name.last}`,
-              location: `${data.location.state}, ${data.nat}`,
-              thumbnail: `${data.picture.large}`,
-  
-            }
-          )))
-          .then(items => this.setState({
-            items,
-            isLoaded: false
-          }))
-          .catch(error => console.log('parsing failed', error))
-      }
-  
+  }, [fetch]);
 
-
-    render () {
-
-           const {items} = this.state;
+  return (
+    <>
+    <div>
+      <h1 className="text-center">Rick and Morty</h1>
+      <br></br>
+      <br></br>
+      {users.map((item, index) => {
         return (
-          <div className="boxBlack">
-            <h2 className="text-center">Random Profile</h2>
-            <br></br>
-            <br></br>
-            {
-              items.length > 0 ? items.map(item => {
-              const {id, firstName, lastName, location, thumbnail} = item;
-               return (
-                    
-                    <div style={{display:"inline-block", verticalAlign:"top", width:"300px", height:"300px"}} 
-                    key={id} className="ms-4 p-5 text-center">
-                    <img src={thumbnail} alt={firstName} className="circle"/><br></br>
-                        {firstName} {lastName}<br />
-                        {location}
-                        <br></br>
-                    </div>
-              );
-
-            }) : null
-          }
-          </div>
-        );
-        
-    }
+          
+            <div key={index} className="card mx-4 mb-5" style={{width: "18rem", display:"inline-flex"}}>
+            <img src={item.image} className="card-img-top" alt={item.name}></img>
+            <div className="card-body">
+              <h5 className="card-title">{item.name}</h5>
+              <p className="card-text">{item.species} {item.gender}</p>
+              <Link to={`/Detail/${item.id}`} className="btn btn-primary btn-sm">Detail</Link>
+            </div>
+            </div>
+            
+        )
+      })}
+    </div>
+    </>
+  )
 }
+
+export default Profile
+
+  
